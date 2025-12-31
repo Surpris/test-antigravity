@@ -51,3 +51,6 @@ pnpm-debug.log*
 
 # MCP settings and outputs
 .serena/
+
+# Environment variables
+.env
