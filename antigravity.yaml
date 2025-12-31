@@ -1,0 +1,2 @@
+tools:
+  - path: .agent/tools/user_db_tool.py
