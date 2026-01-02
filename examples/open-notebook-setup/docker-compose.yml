@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:v1-latest
+    container_name: open-notebook-db
+    ports:
+      - "8000:8000"
+    command: start --log warn --user root --pass root file:///mydata/database.db
+    volumes:
+      - ./surreal_data:/mydata
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  open_notebook:
+    image: lfnovo/open_notebook:v1-latest
+    container_name: open-notebook-app
+    ports:
+      - "8502:8502" # Next.js Frontend
+      - "5055:5055" # REST API
+    env_file:
+      - .env
+    volumes:
+      - ./notebook_data:/app/data
+    depends_on:
+      surrealdb:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5055/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
