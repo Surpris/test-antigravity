@@ -23,4 +23,4 @@ Test Antigravity according to the reference.
 - Agent Skills
   - [Overview - Agent Skills](https://agentskills.io/home)
   - [Specification - Agent Skills](https://agentskills.io/specification)
-  - [Agent SkillsなんてAIに書かせればええねん｜Antigravityの場合｜さしし｜AIコソ錬コーナー](https://note.com/sasisi344/n/n13b76bec0463)
+  - [Agent SkillsなんてAIに書かせればええねん｜Antigravityの場合｜さしし｜AIコソ錬コーナー](https://note.com/sasisi344/n/n13b76bec0463) (in Japanese)
