@@ -18,3 +18,9 @@ Test Antigravity according to the reference.
     - この記事の内容は古い。
   - [LLM用宣言的プログラミング言語 DSPy](https://zenn.dev/cybernetics/articles/f879e10b53c2db) (in Japanese)
   - [プロンプトエンジニアリングを終わらせるDSPy](https://zenn.dev/cybernetics/articles/39fb763aca746c) (in Japanese)
+- Open Notebook
+  - [lfnovo/open-notebook](https://github.com/lfnovo/open-notebook)
+- Agent Skills
+  - [Overview - Agent Skills](https://agentskills.io/home)
+  - [Specification - Agent Skills](https://agentskills.io/specification)
+  - [Agent SkillsなんてAIに書かせればええねん｜Antigravityの場合｜さしし｜AIコソ錬コーナー](https://note.com/sasisi344/n/n13b76bec0463)
