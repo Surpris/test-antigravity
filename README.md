@@ -28,3 +28,8 @@ Test Antigravity according to the reference.
   - [AntigravityがNano Banana Proに対応したらしいので画像生成させてみる #Gemini - Qiita](https://qiita.com/rf_p/items/e086c8bb107697fbba39) (in Japanese)
 - Gemini x Figma x Playwright
   - [Figma→実装の再現度を上げるAIワークフロー設計（Claude Code × Playwright）](https://zenn.dev/reality_tech/articles/1d6df6811715fb) (in Japanese)
+- クリーンアーキテクチャ
+  - [クリーンアーキテクチャに入門して分かった利点と弱点](https://zenn.dev/mitsutech105/articles/241d5b4886bdc8) (in Japanese)
+  - [やさしいクリーンアーキテクチャ](https://zenn.dev/sre_holdings/articles/a57f088e9ca07d) (in Japanese)
+  - [AGENTS.md の概要｜npaka](https://note.com/npaka/n/nd1258df2853c)
+    - Reference for creating `AGENTS.md`.
