@@ -24,3 +24,5 @@ Test Antigravity according to the reference.
   - [Overview - Agent Skills](https://agentskills.io/home)
   - [Specification - Agent Skills](https://agentskills.io/specification)
   - [Agent SkillsなんてAIに書かせればええねん｜Antigravityの場合｜さしし｜AIコソ錬コーナー](https://note.com/sasisi344/n/n13b76bec0463) (in Japanese)
+- Nano Banana
+  - [AntigravityがNano Banana Proに対応したらしいので画像生成させてみる #Gemini - Qiita](https://qiita.com/rf_p/items/e086c8bb107697fbba39) (in Japanese)
