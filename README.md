@@ -26,3 +26,5 @@ Test Antigravity according to the reference.
   - [Agent SkillsなんてAIに書かせればええねん｜Antigravityの場合｜さしし｜AIコソ錬コーナー](https://note.com/sasisi344/n/n13b76bec0463) (in Japanese)
 - Nano Banana
   - [AntigravityがNano Banana Proに対応したらしいので画像生成させてみる #Gemini - Qiita](https://qiita.com/rf_p/items/e086c8bb107697fbba39) (in Japanese)
+- Gemini x Figma x Playwright
+  - [Figma→実装の再現度を上げるAIワークフロー設計（Claude Code × Playwright）](https://zenn.dev/reality_tech/articles/1d6df6811715fb) (in Japanese)

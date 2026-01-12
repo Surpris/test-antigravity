@@ -1,0 +1,7 @@
+（ユーザーアクション: ターミナルで `npm run extract:styles http://localhost:5173/CampaignPage .figma-mcp/cache/computed_styles.json` を実行してください）
+
+ブラウザでレンダリングされた結果から「Computed Style (計算済みスタイル)」を抽出しました。
+結果は `.figma-mcp/cache/computed_styles.json` に保存されています。
+
+これは、Tailwindのクラスの解釈ブレやブラウザのデフォルトスタイルの影響を排除した、**「真のデザインスタイル定義（Truth Data）」** となります。
+次工程のVue実装では、このJSONを正として扱います。

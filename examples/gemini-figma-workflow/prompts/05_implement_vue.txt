@@ -1,0 +1,10 @@
+本番環境用の **Vue.js** コンポーネントを実装してください。
+
+**参照ソース:**
+1. **構造の参照**: `.figma-mcp/src/routes/CampaignPage.tsx` (React実装)
+2. **スタイルの参照**: `.figma-mcp/cache/computed_styles.json` (Computed Style)
+
+**重要な指示:**
+- React実装はあくまでDOM構造の参考とし、スタイルに関しては `computed_styles.json` の値を **絶対的な正解** として優先してください。
+- Tailwind CSSを使用するか、Scoped CSSを使用するかはプロジェクト設定に従いますが、`computed_styles.json` にある `display`, `margin`, `padding`, `font-size` 等の数値が正確に反映されるようにしてください。
+- 出力先: `src/components/CampaignPage.vue`

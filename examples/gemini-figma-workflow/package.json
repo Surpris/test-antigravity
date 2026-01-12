@@ -1,0 +1,16 @@
+{
+  "name": "gemini-figma-workflow-example",
+  "version": "1.0.0",
+  "description": "Example workflow for Figma to Implementation using Gemini and Playwright",
+  "scripts": {
+    "test": "npx playwright test",
+    "verify:react": "node scripts/verify_react.js",
+    "extract:styles": "node scripts/extract_computed_styles.js"
+  },
+  "dependencies": {
+    "playwright": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "latest"
+  }
+}
