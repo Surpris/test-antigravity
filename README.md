@@ -33,3 +33,5 @@ Test Antigravity according to the reference.
   - [やさしいクリーンアーキテクチャ](https://zenn.dev/sre_holdings/articles/a57f088e9ca07d) (in Japanese)
   - [AGENTS.md の概要｜npaka](https://note.com/npaka/n/nd1258df2853c)
     - Reference for creating `AGENTS.md`.
+- Programming practice
+  - [バハムート駆動開発をやってください #オブジェクト指向 - Qiita](https://qiita.com/RealFlair/items/f9edf19495275f36e784) (in Japanese)
