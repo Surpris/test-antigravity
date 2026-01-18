@@ -1,0 +1,98 @@
+[
+  {
+    "id": "REQ-001",
+    "type": "FR",
+    "category": "モデリング",
+    "story": {
+      "title": "YAMLによる論理モデル定義",
+      "actor": "データアーキテクト",
+      "action": "論理データモデルをYAML形式で記述",
+      "object": "データモデル",
+      "reason": "特定のデータベース製品や言語に依存しない、ポータブルで人間が読みやすい形式で設計情報を管理するため",
+      "full_text": "データアーキテクトとして、論理データモデルをYAML形式で記述したい。なぜならば、特定のデータベース製品や言語に依存しない、ポータブルで人間が読みやすい形式で設計情報を管理するためだからだ。"
+    },
+    "acceptance_criteria": {
+      "scenario_title": "YAMLスキーマへの準拠",
+      "given": "`schema/logical_model_schema.json` に定義されたスキーマが存在する",
+      "when": "ユーザーが定義に従って `entities`, `attributes`, `relationships` を記述したYAMLファイルを作成する",
+      "then": "そのファイルが有効なモデル定義としてツールに認識される"
+    },
+    "source": {
+      "document_name": "packages/logical-model-tools/README.md",
+      "page": null,
+      "quote": "論理データモデル（Logical Data Model）を YAML 形式で定義し、そこから TypeScript の型定義を自動生成したり、モデルの整合性を検証したりするためのツールセット"
+    }
+  },
+  {
+    "id": "REQ-002",
+    "type": "FR",
+    "category": "バリデーション",
+    "story": {
+      "title": "モデル定義の自動検証",
+      "actor": "開発者",
+      "action": "モデル定義ファイルの整合性を検証",
+      "object": "YAMLファイル",
+      "reason": "手動でのレビューでは見逃しやすい記述ミスや参照エラー（存在しないエンティティへのリンクなど）を早期に発見するため",
+      "full_text": "開発者として、モデル定義ファイルの整合性を検証したい。なぜならば、手動でのレビューでは見逃しやすい記述ミスや参照エラー（存在しないエンティティへのリンクなど）を早期に発見するためだからだ。"
+    },
+    "acceptance_criteria": {
+      "scenario_title": "参照整合性のチェック",
+      "given": "EntityA が定義されているが、EntityB は定義されていない状態で、EntityA が EntityB を参照するリレーションを持つ YAML ファイルがある",
+      "when": "`lms-val` コマンドを実行する",
+      "then": "「EntityB は存在しません」という旨のエラーメッセージが表示され、検証が失敗する"
+    },
+    "source": {
+      "document_name": "packages/logical-model-tools/README.md",
+      "page": null,
+      "quote": "文法エラー（スキーマ違反）だけでなく、リレーションシップの target が実在するエンティティを指しているかどうかの整合性もチェックします"
+    }
+  },
+  {
+    "id": "REQ-003",
+    "type": "FR",
+    "category": "コード生成",
+    "story": {
+      "title": "TypeScript型定義の自動生成",
+      "actor": "フロントエンド開発者",
+      "action": "TypeScriptのインターフェースを生成",
+      "object": "モデル定義",
+      "reason": "設計（YAML）と実装（コード）の間の不整合を防ぎ、Single Source of Truth（信頼できる唯一の情報源）を実現するため",
+      "full_text": "フロントエンド開発者として、TypeScriptのインターフェースを生成したい。なぜならば、設計（YAML）と実装（コード）の間の不整合を防ぎ、Single Source of Truth（信頼できる唯一の情報源）を実現するためだからだ。"
+    },
+    "acceptance_criteria": {
+      "scenario_title": "型定義ファイルの生成",
+      "given": "有効な `model.yaml` が存在する",
+      "when": "`lms-gen` コマンドを実行する",
+      "then": "同じディレクトリに `_types.ts` が生成され、定義されたエンティティに対応する `interface` が含まれている"
+    },
+    "source": {
+      "document_name": "packages/logical-model-tools/README.md",
+      "page": null,
+      "quote": "指定したディレクトリ内の YAML ファイル (.yaml, .yml) または指定したファイルを読み込み、同ディレクトリに _types.ts ファイルを生成します"
+    }
+  },
+  {
+    "id": "REQ-004",
+    "type": "FR",
+    "category": "モデリング",
+    "story": {
+      "title": "リレーション属性（エッジ属性）の定義",
+      "actor": "データモデラー",
+      "action": "リレーションシップ自体に属性を定義",
+      "object": "関係性",
+      "reason": "「いつグループに参加したか」のような、エンティティ単体ではなく「関係」に紐づく情報を適切にモデル化するため",
+      "full_text": "データモデラーとして、リレーションシップ自体に属性を定義したい。なぜならば、「いつグループに参加したか」のような、エンティティ単体ではなく「関係」に紐づく情報を適切にモデル化するためだからだ。"
+    },
+    "acceptance_criteria": {
+      "scenario_title": "エッジ属性のコード生成",
+      "given": "`relationships` 内に `attributes` フィールドを持つリレーション定義がある",
+      "when": "コード生成を実行する",
+      "then": "生成されたTypeScriptの型において、該当するリレーションシップのプロパティに、定義した属性が含まれている"
+    },
+    "source": {
+      "document_name": "logical_model_schema.json",
+      "page": null,
+      "quote": "attributes: (任意) リレーションシップ自体に紐づく属性（エッジ属性）。定義方法はエンティティの属性と同じ。"
+    }
+  }
+]
