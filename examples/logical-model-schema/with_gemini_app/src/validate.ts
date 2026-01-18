@@ -5,6 +5,7 @@ import Ajv from 'ajv';
 
 // --- 設定 ---
 const SCHEMA_FILE = path.resolve(__dirname, '../schema/logical_model_schema.json');
+const DEFAULT_TARGET_PATH = path.resolve(__dirname, '../sample');
 
 // --- 型定義 ---
 interface LogicalModel {
@@ -23,7 +24,7 @@ interface LogicalModel {
 // --- メイン処理 ---
 async function main() {
   // 1. 対象パスの決定 (引数がなければカレントディレクトリ '.')
-  const targetPath = process.argv[2] || '.';
+  const targetPath = process.argv[2] || DEFAULT_TARGET_PATH;
   
   console.log(`🚀 Starting Validation Process...`);
   console.log(`📂 Target Path: "${targetPath}"`);

@@ -8,7 +8,7 @@
     "validate": "ts-node ./src/validate.ts",
     "generate": "ts-node ./src/generator.ts",
     "build": "ts-node ./src/generator.ts",
-    "all": "npm run ./src/validate && npm run ./src/generate",
+    "all": "npm run validate && npm run generate",
     "lint": "spectral lint"
   },
   "keywords": [],
