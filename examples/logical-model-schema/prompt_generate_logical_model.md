@@ -48,6 +48,7 @@ entities:
 * `1:N`: 必須の1対多
 * `0:1`: 任意の1対1（ゼロまたは1）
 * `0:N`: 任意の1対多（ゼロまたは多）
+* `attributes`: (任意) リレーションシップ自体に紐づく属性（エッジ属性）。定義方法はエンティティの属性と同じ。
 
 ## 記述例
 
@@ -102,5 +103,9 @@ entities:
         target: "Contributor"
         description: "データセットの管理責任者"
         cardinality: "0:1"
+        attributes:
+          assigned_at:
+            type: "Date"
+            description: "管理責任者としての指名日"
 
 ```
