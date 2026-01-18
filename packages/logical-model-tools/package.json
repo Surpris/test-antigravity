@@ -1,0 +1,37 @@
+{
+  "name": "logical-model-tools",
+  "version": "1.0.0",
+  "description": "Tools for generating and validating logical data models from YAML",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "lms-gen": "dist/bin/lms-gen.js",
+    "lms-val": "dist/bin/lms-val.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "schema"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "logical-model",
+    "schema",
+    "generator",
+    "validation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "js-yaml": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
