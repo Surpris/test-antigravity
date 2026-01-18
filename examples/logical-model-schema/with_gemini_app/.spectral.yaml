@@ -1,0 +1,23 @@
+functions:
+  - checkRelationship
+
+rules:
+  # ルール1: JSON Schemaによる構造チェック
+  # 前回作成した logical_model_schema.json を利用します
+  logical-model-schema-validation:
+    description: "Validate structure against the Logical Model Schema"
+    severity: error
+    given: "$" # ルートから適用
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          $ref: "./schema/logical_model_schema.json" # 作成済みのスキーマファイル
+
+  # ルール2: リレーションの整合性チェック（カスタム）
+  logical-model-broken-links:
+    description: "Relationships must point to existing entities"
+    severity: error
+    given: "$.entities.*.relationships.*.target" # チェック対象のパス（JSONPath）
+    then:
+      function: checkRelationship
