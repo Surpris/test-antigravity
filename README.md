@@ -35,3 +35,5 @@ Test Antigravity according to the reference.
     - Reference for creating `AGENTS.md`.
 - Programming practice
   - [バハムート駆動開発をやってください #オブジェクト指向 - Qiita](https://qiita.com/RealFlair/items/f9edf19495275f36e784) (in Japanese)
+- Logical data model schema construction
+  - Based on conversation with Gemini.
