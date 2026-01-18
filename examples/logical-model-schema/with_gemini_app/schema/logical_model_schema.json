@@ -122,6 +122,16 @@
           "type": "string",
           "enum": ["1:1", "1:N", "0:1", "0:N", "N:M"],
           "description": "Cardinality from the source entity to the target entity."
+        },
+        "attributes": {
+          "type": "object",
+          "description": "Properties/Attributes specifically for this relationship (edge properties).",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "$ref": "#/definitions/attribute"
+            }
+          },
+          "additionalProperties": false
         }
       }
     }

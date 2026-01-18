@@ -30,6 +30,7 @@ interface RelationshipDef {
   target: string;
   description?: string;
   cardinality: string;
+  attributes?: { [key: string]: AttributeDef };
 }
 
 // データ型マッピング設定
@@ -147,6 +148,22 @@ function generateTypeScript(yamlContent: string): string {
       
       lines.push(`  /** Target Entity ID (${targetEntityName}) */`);
       lines.push(`  target_id: ${targetType};`);
+
+      // Relationship Attributes
+      for (const [attrName, attrDef] of Object.entries(relDef.attributes || {})) {
+        const isOptional = !attrDef.required;
+        const doc = generateJSDoc(attrDef.description, attrDef.note);
+        
+        let tsType = 'any';
+        if (attrDef.type === 'Enum' && attrDef.options) {
+          tsType = attrDef.options.map(opt => `"${opt}"`).join(' | ');
+        } else {
+          tsType = TYPE_MAPPING[attrDef.type] || 'any';
+        }
+
+        if (doc) lines.push(`  ${doc}`);
+        lines.push(`  ${attrName}${isOptional ? '?' : ''}: ${tsType};`);
+      }
 
       lines.push('}');
       lines.push('');

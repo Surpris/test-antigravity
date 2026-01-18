@@ -76,7 +76,18 @@ entities:
         target: "Contributor"
         description: "研究データの取得者又は収集者"
         cardinality: "1:1"
+        attributes:
+          collected_at:
+            type: "Date"
+            description: "研究データの取得年月日"
       managed_by:
         target: "Contributor"
         description: "研究データの管理者"
         cardinality: "0:1"
+        attributes:
+          managed_from:
+            type: "Date"
+            description: "研究データの管理開始日"
+          managed_to:
+            type: "Date"
+            description: "研究データの管理終了日"

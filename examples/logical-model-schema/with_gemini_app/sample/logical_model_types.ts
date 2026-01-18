@@ -117,6 +117,10 @@ export interface Dataset_CollectedBy_Contributor {
   source_id: number;
   /** Target Entity ID (Contributor) */
   target_id: string;
+  /**
+ * 研究データの取得年月日
+ */
+  collected_at?: Date;
 }
 
 /**
@@ -130,4 +134,12 @@ export interface Dataset_ManagedBy_Contributor {
   source_id: number;
   /** Target Entity ID (Contributor) */
   target_id: string;
+  /**
+ * 研究データの管理開始日
+ */
+  managed_from?: Date;
+  /**
+ * 研究データの管理終了日
+ */
+  managed_to?: Date;
 }

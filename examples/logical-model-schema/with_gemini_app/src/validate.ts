@@ -13,6 +13,7 @@ interface LogicalModel {
       relationships?: {
         [key: string]: {
           target: string;
+          attributes?: { [key: string]: any };
         };
       };
     };
