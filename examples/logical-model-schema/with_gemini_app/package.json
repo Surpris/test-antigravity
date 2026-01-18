@@ -1,0 +1,27 @@
+{
+  "name": "with_gemini_app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "ts-node ./src/validate.ts",
+    "validate": "ts-node ./src/validate.ts",
+    "generate": "ts-node ./src/generator.ts",
+    "build": "ts-node ./src/generator.ts",
+    "all": "npm run ./src/validate && npm run ./src/generate"
+  },
+  "keywords": [],
+  "author": "Surpris & Gemini",
+  "license": "Apache-2.0",
+  "type": "commonjs",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "js-yaml": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^25.0.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
