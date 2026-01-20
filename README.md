@@ -37,3 +37,5 @@ Test Antigravity according to the reference.
   - [バハムート駆動開発をやってください #オブジェクト指向 - Qiita](https://qiita.com/RealFlair/items/f9edf19495275f36e784) (in Japanese)
 - Logical data model schema construction
   - Based on conversation with Gemini.
+- [ExStruct](https://github.com/harumiWeb/exstruct)
+  - [RAGで厄介なExcel文書を意味構造JSON化するOSSライブラリを作りました](https://zenn.dev/harumikun/articles/42e9cd55ab5960) (in Japanese)
