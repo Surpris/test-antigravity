@@ -2,7 +2,7 @@
 name = "exstruct-mcp-server"
 version = "0.1.0"
 description = "MCP server for reading Excel files using ExStruct"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "mcp",
     "exstruct",
