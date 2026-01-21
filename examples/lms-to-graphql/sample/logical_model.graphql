@@ -1,0 +1,74 @@
+# GraphQL Schema for ResearchDataManagementPlan_LogicalModel
+
+"""
+科学研究費助成事業データマネジメントプラン（DMP）様式例に基づく論理データモデル
+"""
+
+"""
+DMP自体の作成・更新に関するメタデータ
+"""
+type DMPMetadata {
+    "DMP作成年月日"
+  created_date: String!
+    "DMP最終更新年月日"
+  last_updated_date: String!
+}
+
+"""
+データマネジメントの対象となる研究プロジェクト
+"""
+type Project {
+    "研究課題番号"
+  project_number: ID!
+  has_metadata: DMPMetadata!
+  has_contributors: [Contributor]!
+  has_datasets: [Dataset]!
+}
+
+"""
+プロジェクトに関与する研究者およびスタッフ
+"""
+type Contributor {
+    "本計画書内通し番号"
+  contributor_id: ID!
+    "氏名"
+  name: String!
+    "プロジェクト内の役割"
+  role_in_project: String
+}
+
+"""
+プロジェクトで生成・収集される個別のデータセット
+"""
+type Dataset {
+    "No."
+  dataset_no: ID!
+    "研究データの名称"
+  title: String!
+    "研究データの公開・提供方針"
+  access_policy: String
+    "研究データの取得者又は収集者"
+  collected_by: DatasetCollected_by!
+    "研究データの管理者"
+  managed_by: DatasetManaged_by
+}
+
+"""
+Relationship object for Dataset.collected_by
+"""
+type DatasetCollected_by {
+  target: Contributor!
+    "研究データの取得年月日"
+  collected_at: String
+}
+
+"""
+Relationship object for Dataset.managed_by
+"""
+type DatasetManaged_by {
+  target: Contributor!
+    "研究データの管理開始日"
+  managed_from: String
+    "研究データの管理終了日"
+  managed_to: String
+}

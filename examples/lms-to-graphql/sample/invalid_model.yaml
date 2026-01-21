@@ -1,0 +1,15 @@
+schema_version: "1.0"
+model_name: "InvalidModel"
+entities:
+  ValidEntity:
+    description: "Valid"
+    attributes:
+      id:
+        type: "String" ## Valid
+        description: "ID"
+  InvalidEntity:
+    description: "Invalid"
+    relationships:
+      broken_link:
+        target: "NonExistentEntity" ## Referential Integrity Error
+        cardinality: "1:1"
