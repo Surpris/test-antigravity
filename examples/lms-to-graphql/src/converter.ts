@@ -1,19 +1,24 @@
 import { LogicalModel, Entity, Attribute, Relationship } from './types';
 
+/**
+ * 論理モデルを GraphQL SDL 文字列に変換します。
+ * @param model 変換対象の論理データモデル
+ * @returns 生成された GraphQL SDL
+ */
 export function convertLogicalModelToGraphQL(model: LogicalModel): string {
   const parts: string[] = [];
 
-  // Add header
+  // ヘッダーの追加
   parts.push(`# GraphQL Schema for ${model.model_name}`);
   if (model.description) {
     parts.push(`"""\n${model.description}\n"""`);
   }
 
-  // Iterate over entities
+  // 各エンティティの変換
   for (const [entityName, entity] of Object.entries(model.entities)) {
     parts.push(convertEntity(entityName, entity));
     
-    // Check for relationships with attributes and generate intermediate types
+    // 属性を持つリレーションシップの中間型を生成
     if (entity.relationships) {
       for (const [relName, rel] of Object.entries(entity.relationships)) {
         if (rel.attributes) {
@@ -26,6 +31,12 @@ export function convertLogicalModelToGraphQL(model: LogicalModel): string {
   return parts.join('\n\n');
 }
 
+/**
+ * 単一のエンティティを GraphQL type に変換します。
+ * @param name エンティティ名
+ * @param entity エンティティ定義
+ * @returns エンティティの GraphQL type 定義
+ */
 function convertEntity(name: string, entity: Entity): string {
   const lines: string[] = [];
   if (entity.description) {
@@ -33,12 +44,12 @@ function convertEntity(name: string, entity: Entity): string {
   }
   lines.push(`type ${name} {`);
 
-  // Attributes
+  // 属性の変換
   for (const [attrName, attr] of Object.entries(entity.attributes)) {
     lines.push(`  ${convertfield(attrName, attr)}`);
   }
 
-  // Relationships
+  // リレーションシップの変換
   if (entity.relationships) {
     for (const [relName, rel] of Object.entries(entity.relationships)) {
       lines.push(`  ${convertRelationshipField(name, relName, rel)}`);
@@ -49,18 +60,22 @@ function convertEntity(name: string, entity: Entity): string {
   return lines.join('\n');
 }
 
+/**
+ * 属性を GraphQL フィールドに変換します。
+ * @param name フィールド名
+ * @param attr 属性定義
+ * @param isEdgeProperty リレーションシップ属性（エッジプロパティ）かどうか
+ * @returns GraphQL フィールド定義
+ */
 function convertfield(name: string, attr: Attribute, isEdgeProperty: boolean = false): string {
   let type = mapType(attr.type);
   
-  // Handle ID for primary keys
+  // 主キーの場合は ID 型にする
   if (attr.primary_key) {
     type = 'ID';
   }
 
-  // Handle required
-  // For edge properties, we assume they are nullable unless explicitly required, 
-  // but logically if they are attributes of the relation they might be required.
-  // The schema says default required is false.
+  // 必須チェック（主キーは常に必須）
   if (attr.required || attr.primary_key) {
     type += '!';
   }
@@ -69,39 +84,47 @@ function convertfield(name: string, attr: Attribute, isEdgeProperty: boolean = f
   return `${desc}${name}: ${type}`;
 }
 
+/**
+ * 論理モデルの型を GraphQL のスカラ型にマッピングします。
+ * @param type 論理モデルの型
+ * @returns GraphQL の型名
+ */
 function mapType(type: Attribute['type']): string {
   switch (type) {
     case 'String': return 'String';
     case 'Integer': return 'Int';
     case 'Float': return 'Float';
     case 'Boolean': return 'Boolean';
-    case 'Date': return 'String'; // Or Custom Scalar
-    case 'DateTime': return 'String'; // Or Custom Scalar
+    case 'Date': return 'String';
+    case 'DateTime': return 'String';
     case 'Text': return 'String';
-    case 'Enum': return 'String'; // Simplified for now, could generate Enum types
+    case 'Enum': return 'String'; 
     default: return 'String';
   }
 }
 
+/**
+ * リレーションシップを GraphQL フィールドに変換します。
+ * @param entityName 元のエンティティ名
+ * @param relName リレーションシップ名
+ * @param rel リレーションシップ定義
+ * @returns GraphQL フィールド定義
+ */
 function convertRelationshipField(entityName: string, relName: string, rel: Relationship): string {
   let type = rel.target;
 
-  // If attributes exist, point to the Intermediate Type
+  // 属性がある場合は中間型を指すようにする
   if (rel.attributes) {
     type = getIntermediateTypeName(entityName, relName);
   }
 
-  // Handle Cardinality
+  // カーディナリティに基づきリスト型にするかどうかを判定
   const isList = rel.cardinality === '1:N' || rel.cardinality === '0:N' || rel.cardinality === 'N:M';
   if (isList) {
     type = `[${type}]`;
   }
 
-  // Cardinality 1:1 or 1:N implies required? 
-  // 1:1 -> Required? 0:1 -> Optional.
-  // 1:N -> List required? Empty list?
-  // Let's assume nullable for now unless we strictly enforce 1 vs 0.
-  // Actually, '1:...' usually means mandatory relationship.
+  // カーディナリティが '1:...' の場合は必須とする
   const isRequired = rel.cardinality.startsWith('1');
   if (isRequired) {
     type += '!';
@@ -111,6 +134,13 @@ function convertRelationshipField(entityName: string, relName: string, rel: Rela
   return `${desc}${relName}: ${type}`;
 }
 
+/**
+ * 属性を持つリレーションシップのための中間型を生成します。
+ * @param entityName エンティティ名
+ * @param relName リレーションシップ名
+ * @param rel リレーションシップ定義
+ * @returns 中間型の GraphQL type 定義
+ */
 function convertRelationshipType(entityName: string, relName: string, rel: Relationship): string {
     const typeName = getIntermediateTypeName(entityName, relName);
     const lines: string[] = [];
@@ -118,13 +148,10 @@ function convertRelationshipType(entityName: string, relName: string, rel: Relat
     lines.push(`"""\nRelationship object for ${entityName}.${relName}\n"""`);
     lines.push(`type ${typeName} {`);
     
-    // Target field
-    // Usually we might call this 'node' or 'target' or the entity name (uncapitalized)
-    // Let's use 'target' for consistency with our schema, or better yet, the type name in camelCase?
-    // Schema uses 'target: "Contributor"'. Let's use 'node' as it is common in Relay, or just 'target'.
+    // ターゲットフィールド
     lines.push(`  target: ${rel.target}!`);
     
-    // Edge properties
+    // リレーション自体の属性
     if (rel.attributes) {
       for (const [attrName, attr] of Object.entries(rel.attributes)) {
         lines.push(`  ${convertfield(attrName, attr, true)}`);
@@ -135,11 +162,22 @@ function convertRelationshipType(entityName: string, relName: string, rel: Relat
     return lines.join('\n');
 }
 
+/**
+ * 中間型の型名を生成します（例: DatasetManagedBy）。
+ * @param entityName エンティティ名
+ * @param relName リレーションシップ名
+ * @returns 生成された型名
+ */
 function getIntermediateTypeName(entityName: string, relName: string): string {
-  // e.g. DatasetManagedBy
   return `${entityName}${capitalize(relName)}`;
 }
 
+/**
+ * 文字列の先頭を大文字にします。
+ * @param s 文字列
+ * @returns 先頭が大文字の文字列
+ */
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+

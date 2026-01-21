@@ -40,3 +40,5 @@ Test Antigravity according to the reference.
 - MCP server prototype of ExStruct
   - [GitHub](https://github.com/harumiWeb/exstruct)
   - [RAGで厄介なExcel文書を意味構造JSON化するOSSライブラリを作りました](https://zenn.dev/harumikun/articles/42e9cd55ab5960) (in Japanese)
+- Logical data model to GraphQL schema conversion
+  - See [examples/lms-to-graphql](https://github.com/harumiWeb/exstruct/tree/main/examples/lms-to-graphql) for details.

@@ -6,6 +6,10 @@ import { convertLogicalModelToGraphQL } from './converter';
 import { LogicalModel } from './types';
 import { Validator } from './validator';
 
+/**
+ * CLI のエントリポイント。
+ * commander を使用してコマンドライン引数を解析し、メイン処理を実行します。
+ */
 async function main() {
   program
     .version('1.0.0')
@@ -18,6 +22,11 @@ async function main() {
   program.parse(process.argv);
 }
 
+/**
+ * YAML ファイルを読み込み、バリデーションを行い、GraphQL SDL に変換してファイル出力します。
+ * @param filePath 変換対象の YAML ファイルのパス
+ * @param outputDir 出力先ディレクトリ（任意）
+ */
 async function processFile(filePath: string, outputDir?: string) {
   try {
     const absolutePath = path.resolve(filePath);
@@ -29,7 +38,7 @@ async function processFile(filePath: string, outputDir?: string) {
     const fileContents = fs.readFileSync(absolutePath, 'utf8');
     const model = yaml.load(fileContents) as LogicalModel;
 
-    // Validation
+    // バリデーション実行
     const validator = new Validator();
     const result = validator.validate(model);
 
@@ -41,36 +50,33 @@ async function processFile(filePath: string, outputDir?: string) {
         console.log('✅ Validation Successful');
     }
 
-    // Conversion
+    // GraphQL SDL への変換
     const sdl = convertLogicalModelToGraphQL(model);
 
-    // Output
+    // ファイル出力
+    const fileName = path.basename(filePath, path.extname(filePath)) + '.graphql';
+    let outputPath: string;
+
     if (outputDir) {
-      // Ensure dir exists
+      // 出力先ディレクトリの作成
       if (!fs.existsSync(outputDir)) {
         fs.mkdirSync(outputDir, { recursive: true });
       }
-      
-      const fileName = path.basename(filePath, path.extname(filePath)) + '.graphql';
-      const outputPath = path.join(outputDir, fileName);
-      fs.writeFileSync(outputPath, sdl);
-      console.log(`✨ GraphQL Schema saved to: ${outputPath}`);
+      outputPath = path.join(outputDir, fileName);
     } else {
-      // Default: save to same dir as input
-      // OLD behavior: print to stdout. User requirements said: "Output destination can be specified by option, default is the directory where the input file exists."
-      // So if no option, write to input file dir.
+      // デフォルト：入力ファイルと同じディレクトリに出力
       const dir = path.dirname(absolutePath);
-      const fileName = path.basename(filePath, path.extname(filePath)) + '.graphql';
-      const outputPath = path.join(dir, fileName);
-      
-      fs.writeFileSync(outputPath, sdl);
-      console.log(`✨ GraphQL Schema saved to: ${outputPath}`);
+      outputPath = path.join(dir, fileName);
     }
+
+    fs.writeFileSync(outputPath, sdl);
+    console.log(`✨ GraphQL Schema saved to: ${outputPath}`);
 
   } catch (e: any) {
     console.error(`Error processing file: ${e.message}`);
     process.exit(1);
   }
 }
+
 
 main();

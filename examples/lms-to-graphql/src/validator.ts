@@ -3,31 +3,42 @@ import * as path from 'path';
 import Ajv from 'ajv';
 import { LogicalModel } from './types';
 
+/**
+ * 論理データモデルのバリデーションを行うクラス。
+ * JSON Schema による構造チェックと、エンティティ間の参照整合性チェックを提供します。
+ */
 export class Validator {
   private ajv: Ajv;
   private validateSchema: any;
   private schemaPath: string;
 
+  /**
+   * Validator インスタンスを初期化し、JSON Schema をロードします。
+   */
   constructor() {
     this.ajv = new Ajv({ allErrors: true });
-    // Assuming the schema is located at ../schema/logical_model_schema.json relative to project root
-    // When running from dist/ (compiled), __dirname is dist/src or dist/.
-    // Let's try to resolve relative to process.cwd() or find a robust way.
-    // For this example, let's assume we run from project root.
+    // スキーマファイルはプロジェクトルートの schema/logical_model_schema.json にあると想定
     this.schemaPath = path.resolve(process.cwd(), 'schema/logical_model_schema.json');
     this.loadSchema();
   }
 
+  /**
+   * 指定されたパスから JSON Schema を読み込み、コンパイルします。
+   * @private
+   */
   private loadSchema() {
     if (!fs.existsSync(this.schemaPath)) {
-        // Fallback: try relative to source if running with ts-node directly in src context?
-        // But process.cwd() is usually the project root.
       throw new Error(`Schema file not found at: ${this.schemaPath}`);
     }
     const schemaJson = JSON.parse(fs.readFileSync(this.schemaPath, 'utf8'));
     this.validateSchema = this.ajv.compile(schemaJson);
   }
 
+  /**
+   * 与えられたデータのバリデーションを実行します。
+   * @param data バリデーション対象のデータ
+   * @returns バリデーション結果（有効かどうかとエラーメッセージの配列）
+   */
   public validate(data: any): { valid: boolean; errors: string[] } {
     const valid = this.validateSchema(data);
     const errors: string[] = [];
@@ -38,7 +49,7 @@ export class Validator {
       });
     }
 
-    // Logic validation (Referential Integrity)
+    // 論理バリデーション（参照整合性）
     if (data.entities) {
         const integrityErrors = this.checkReferentialIntegrity(data as LogicalModel);
         errors.push(...integrityErrors);
@@ -50,6 +61,12 @@ export class Validator {
     };
   }
 
+  /**
+   * エンティティ間の参照整合性（リレーションのターゲットが存在するか）をチェックします。
+   * @param data 論理データモデル
+   * @private
+   * @returns 整合性エラーの配列
+   */
   private checkReferentialIntegrity(data: LogicalModel): string[] {
     const errors: string[] = [];
     const entityNames = new Set(Object.keys(data.entities));
@@ -66,3 +83,4 @@ export class Validator {
     return errors;
   }
 }
+
