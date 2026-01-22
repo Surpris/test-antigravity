@@ -15,18 +15,41 @@ export function convertLogicalModelToGraphQL(model: LogicalModel): string {
   }
 
   // 各エンティティの変換
+  const typeDefinitions: string[] = [];
+  const queryFields: string[] = [];
+
   for (const [entityName, entity] of Object.entries(model.entities)) {
-    parts.push(convertEntity(entityName, entity));
+    typeDefinitions.push(convertEntity(entityName, entity));
     
     // 属性を持つリレーションシップの中間型を生成
     if (entity.relationships) {
       for (const [relName, rel] of Object.entries(entity.relationships)) {
         if (rel.attributes) {
-          parts.push(convertRelationshipType(entityName, relName, rel));
+          typeDefinitions.push(convertRelationshipType(entityName, relName, rel));
         }
       }
     }
+
+    // Queryのフィールドを収集（主キーがある場合）
+    for (const [attrName, attr] of Object.entries(entity.attributes)) {
+      if (attr.primary_key) {
+        // エンティティ名の先頭を小文字にしてクエリフィールド名とする
+        const queryName = decapitalize(entityName);
+        // 戻り値は単一のエンティティ（nullable）とする
+        queryFields.push(`  ${queryName}(${attrName}: ID!): ${entityName}`);
+        break; // 主キーは1つと想定
+      }
+    }
   }
+
+  // Query型の生成（先頭に追加）
+  if (queryFields.length > 0) {
+    const queryLines = ['type Query {', ...queryFields, '}'];
+    parts.push(queryLines.join('\n'));
+  }
+
+  // 他の型定義を追加
+  parts.push(...typeDefinitions);
 
   return parts.join('\n\n');
 }
@@ -179,5 +202,14 @@ function getIntermediateTypeName(entityName: string, relName: string): string {
  */
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/**
+ * 文字列の先頭を小文字にします。
+ * @param s 文字列
+ * @returns 先頭が小文字の文字列
+ */
+function decapitalize(s: string): string {
+  return s.charAt(0).toLowerCase() + s.slice(1);
 }
 
