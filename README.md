@@ -43,3 +43,5 @@ Test Antigravity according to the reference.
   - [RAGで厄介なExcel文書を意味構造JSON化するOSSライブラリを作りました](https://zenn.dev/harumikun/articles/42e9cd55ab5960) (in Japanese)
 - Logical data model to GraphQL schema conversion
   - See [examples/lms-to-graphql](https://github.com/harumiWeb/exstruct/tree/main/examples/lms-to-graphql) for details.
+- SOLID principles
+  - [SOLID原則を“暗記で終わらせない”ために：料金計算で腹落ちさせる #Python - Qiita](https://qiita.com/ryucciarati/items/30b527e4208c9165b19c) (in Japanese)
