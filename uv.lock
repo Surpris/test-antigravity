@@ -708,7 +708,7 @@ wheels = [
 
 [[package]]
 name = "exstruct"
-version = "0.3.6"
+version = "0.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -718,9 +718,15 @@ dependencies = [
     { name = "scipy" },
     { name = "xlwings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cb/23/4c1395337af8cf0645be811e4ede8d6b34ff84a0f698088b20f9f0bf196d/exstruct-0.3.6.tar.gz", hash = "sha256:ba0667490a8804ba9f451f609c63388d48fbc522b7c8389a66992656db3d7cc3", size = 61509, upload-time = "2026-01-12T07:40:01.938Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/72/72830a7aeb225858f03da42ae94fa2ab94dbef3456bbf6833d16e7aeeff0/exstruct-0.4.2.tar.gz", hash = "sha256:28743df4f3c03216ba0160d592d4f8842a6ca55ca1748626364b0fef50894a19", size = 81865, upload-time = "2026-01-23T23:54:34.166Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/db/04/bb5f9e3cd984762fa16a96a4adde0cfcee2ce4e5503d629f9dce910316df/exstruct-0.3.6-py3-none-any.whl", hash = "sha256:33e4d6a45c7e6d85f6aa9cc97865feb8db6d65c3be4dee44371f14e4c99468c0", size = 71725, upload-time = "2026-01-12T07:40:00.231Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/48/a43bd96708b28be54caa39c9e6da17fd80a388c32070a38455d8b19634bf/exstruct-0.4.2-py3-none-any.whl", hash = "sha256:a062163e04141d25b3353a3de363aec4cfe6533b08a15c31cb2468be569f3f01", size = 95669, upload-time = "2026-01-23T23:54:32.717Z" },
+]
+
+[package.optional-dependencies]
+mcp = [
+    { name = "httpx" },
+    { name = "mcp" },
 ]
 
 [[package]]
@@ -4163,7 +4169,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "dspy" },
-    { name = "exstruct" },
+    { name = "exstruct", extra = ["mcp"] },
     { name = "google-adk" },
     { name = "jupyterlab" },
     { name = "requests" },
@@ -4172,7 +4178,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "dspy", specifier = ">=3.0.4" },
-    { name = "exstruct", specifier = ">=0.3.6" },
+    { name = "exstruct", extras = ["mcp"], specifier = "==0.4.2" },
     { name = "google-adk", specifier = ">=1.21.0" },
     { name = "jupyterlab", specifier = ">=4.5.1" },
     { name = "requests", specifier = ">=2.32.5" },
