@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Logical Data Model Modular Schema",
+  "description": "Schema for logical data models allowing split files (Master definition and Entity fragments).",
+  "type": "object",
+  "oneOf": [
+    {
+      "$comment": "--- Pattern A: Master Definition File (Must have metadata) ---",
+      "required": ["schema_version", "model_name"],
+      "properties": {
+        "schema_version": { "$ref": "#/definitions/schema_version" },
+        "model_name": { "$ref": "#/definitions/model_name" },
+        "description": { "$ref": "#/definitions/description" },
+        "entities": { "$ref": "#/definitions/entities" }
+      }
+    },
+    {
+      "$comment": "--- Pattern B: Entity Fragment File (Must have entities, Metadata optional/ignored) ---",
+      "required": ["entities"],
+      "properties": {
+        "schema_version": { "$ref": "#/definitions/schema_version" },
+        "model_name": { "$ref": "#/definitions/model_name" },
+        "description": { "$ref": "#/definitions/description" },
+        "entities": { "$ref": "#/definitions/entities" }
+      }
+    }
+  ],
+  "definitions": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Version of this schema definition."
+    },
+    "model_name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_]+$",
+      "description": "Unique name for the data model."
+    },
+    "description": {
+      "type": "string",
+      "description": "Description text."
+    },
+    "entities": {
+      "type": "object",
+      "description": "Collection of entities.",
+      "patternProperties": {
+        "^[A-Z][a-zA-Z0-9]*$": { "$ref": "#/definitions/entity" }
+      },
+      "additionalProperties": false
+    },
+    "entity": {
+      "type": "object",
+      "required": ["description", "attributes"],
+      "properties": {
+        "description": { "$ref": "#/definitions/description" },
+        "attributes": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": { "$ref": "#/definitions/attribute" }
+          },
+          "additionalProperties": false
+        },
+        "relationships": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": { "$ref": "#/definitions/relationship" }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "attribute": {
+      "type": "object",
+      "required": ["type", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "String",
+            "Integer",
+            "Float",
+            "Boolean",
+            "Date",
+            "DateTime",
+            "Text",
+            "Enum"
+          ],
+          "description": "Data type."
+        },
+        "description": { "$ref": "#/definitions/description" },
+        "required": { "type": "boolean", "default": false },
+        "primary_key": { "type": "boolean", "default": false },
+        "note": { "type": "string" },
+        "options": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "if": { "properties": { "type": { "const": "Enum" } } },
+      "then": { "required": ["options"] }
+    },
+    "relationship": {
+      "type": "object",
+      "required": ["target", "cardinality"],
+      "properties": {
+        "target": { "type": "string", "description": "Target Entity Name" },
+        "description": { "$ref": "#/definitions/description" },
+        "cardinality": {
+          "type": "string",
+          "enum": ["1:1", "1:N", "0:1", "0:N", "N:M"]
+        },
+        "attributes": {
+          "type": "object",
+          "description": "Edge properties.",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": { "$ref": "#/definitions/attribute" }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  }
+}

@@ -45,3 +45,5 @@ Test Antigravity according to the reference.
   - See [examples/lms-to-graphql](https://github.com/harumiWeb/exstruct/tree/main/examples/lms-to-graphql) for details.
 - SOLID principles
   - [SOLID原則を“暗記で終わらせない”ために：料金計算で腹落ちさせる #Python - Qiita](https://qiita.com/ryucciarati/items/30b527e4208c9165b19c) (in Japanese)
+- agent-browser
+  - [AI エージェントのために CLI でブラウザを操作する agent-browser](https://azukiazusa.dev/blog/agent-browser-for-ai-agents/) (in Japanese)

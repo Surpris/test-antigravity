@@ -28,6 +28,39 @@
   - 各フィールドの詳細な記述方法
   - 具体的な記述例（ContributorとDatasetの関係など）
 
+### 3. `logical_model_schema_separated.json`
+
+論理データモデルを**複数のファイル（モジュール）に分割して定義**する場合の検証用 JSON Schema です。
+
+- **用途**: 大規模なモデルなどで、エンティティ定義をファイルごとに分割して管理したい場合に使用します。
+- **特徴**: `entities` だけを持つ断片的なYAMLファイルも許容するスキーマ定義になっています。
+
+### 4. `prompt_generate_logical_model_separated.md`
+
+分割モデルを生成・記述するための**仕様書兼AIプロンプト**です。
+
+- **内容**:
+  - **Pattern A (Master Definition)**: モデル全体のメタデータ定義
+  - **Pattern B (Entity Fragment)**: 個別のエンティティ定義
+
+## サンプル実装
+
+このディレクトリには、論理モデルを活用するためのサンプルプロジェクトが含まれています。
+
+### `with_gemini_app`
+
+論理モデルの記述、検証（Validation）、ドキュメント生成などのワークフローを実践するためのサンプルです。
+
+- `ajv` によるスキーマバリデーション
+- `spectral` によるリンター設定
+- TypeScript によるモデル操作スクリプト
+
+### `with_antigravity`
+
+論理モデル (YAML) から TypeScript のインターフェース定義を自動生成するジェネレータの実装例です。
+
+- `generate-data-model-typescript.ts`: YAMLを読み込み、型安全なTypeScriptコードを出力します。
+
 ## 使い方の流れ
 
 ### ステップ1: モデルの作成
