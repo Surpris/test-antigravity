@@ -49,3 +49,6 @@ Test Antigravity according to the reference.
   - [AI エージェントのために CLI でブラウザを操作する agent-browser](https://azukiazusa.dev/blog/agent-browser-for-ai-agents/) (in Japanese)
 - PostgreSQL Development with Prisma
   - [【初級編】開発者が知っておくべきPostgreSQLパフォーマンス改善Tips 初級10選](https://zenn.dev/gizmo/articles/5a3b81b56309c6) (in Japanese)
+- MCP Apps
+  - [Overview | @modelcontextprotocol/ext-apps - v1.0.1](https://modelcontextprotocol.github.io/ext-apps/api/documents/Overview.html)
+  - [Quick Start | @modelcontextprotocol/ext-apps - v1.0.1](https://modelcontextprotocol.github.io/ext-apps/api/documents/Quickstart.html)
