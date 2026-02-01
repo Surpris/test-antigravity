@@ -52,3 +52,5 @@ Test Antigravity according to the reference.
 - MCP Apps
   - [Overview | @modelcontextprotocol/ext-apps - v1.0.1](https://modelcontextprotocol.github.io/ext-apps/api/documents/Overview.html)
   - [Quick Start | @modelcontextprotocol/ext-apps - v1.0.1](https://modelcontextprotocol.github.io/ext-apps/api/documents/Quickstart.html)
+- Everything Claude Code
+  - [GitHub](https://github.com/affaan-m/everything-claude-code)
