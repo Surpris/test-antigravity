@@ -1,0 +1,145 @@
+schema_version: "1.0"
+model_name: "DMP_Information_Model"
+description: "データマネジメントプラン（DMP）の作成、研究課題、担当者、および研究データ詳細を管理する論理データモデル"
+entities:
+  DataManagementPlan:
+    description: "DMPの基本情報を管理するエンティティ"
+    attributes:
+      dmp_id:
+        type: "String"
+        description: "DMPを識別するための一意のID"
+        primary_key: true
+        required: true
+      created_at:
+        type: "Date"
+        description: "DMP作成年月日"
+        required: true
+        note: "画像1の「DMP作成年月日」に対応"
+      last_updated_at:
+        type: "Date"
+        description: "DMP最終更新年月日"
+        required: true
+        note: "画像1の「DMP最終更新年月日」に対応"
+    relationships:
+      funding_program:
+        target: "FundingProgram"
+        description: "このDMPが紐づく研究課題"
+        cardinality: "0:1"
+      contributors:
+        target: "Contributor"
+        description: "本計画書に記載された担当者（研究代表者、分担者等）"
+        cardinality: "1:N"
+        attributes:
+          role:
+            type: "Enum"
+            description: "担当者の役割（表の行見出しに対応）"
+            options:
+              - "研究代表者"
+              - "研究分担者"
+              - "研究データの取得者又は収集者"
+              - "研究開発データの管理責任者"
+          plan_serial_number:
+            type: "Integer"
+            description: "本計画書内通し番号"
+      research_datasets:
+        target: "ResearchData"
+        description: "本計画書で管理対象となる研究データ群"
+        cardinality: "0:N"
+
+  FundingProgram:
+    description: "研究課題情報"
+    attributes:
+      project_number:
+        type: "String"
+        description: "研究課題番号"
+        primary_key: true
+        required: true
+        note: "画像2の「研究課題番号」に対応"
+
+  Contributor:
+    description: "プロジェクト参画者（研究者・データ管理者等）の情報"
+    attributes:
+      contributor_id:
+        type: "String"
+        description: "担当者ID"
+        primary_key: true
+      name:
+        type: "String"
+        description: "氏名"
+        required: true
+      job_title:
+        type: "String"
+        description: "役職"
+        note: "「所属・役職」カラムのうち、役職部分を格納"
+      researcher_number:
+        type: "String"
+        description: "研究者番号"
+        note: "該当がない場合は空欄可"
+      contact_info:
+        type: "String"
+        description: "連絡先"
+    relationships:
+      affiliation:
+        target: "Institution"
+        description: "担当者の所属機関"
+        cardinality: "1:1"
+
+  Institution:
+    description: "担当者の所属機関情報"
+    attributes:
+      institution_id:
+        type: "String"
+        description: "機関ID"
+        primary_key: true
+      institution_name:
+        type: "String"
+        description: "機関名"
+        required: true
+        note: "「所属・役職」カラムのうち、所属（機関名）部分を格納"
+
+  ResearchData:
+    description: "プロジェクトで扱われる個々の研究データの詳細情報"
+    attributes:
+      research_data_id:
+        type: "String"
+        description: "研究データID"
+        primary_key: true
+      serial_number:
+        type: "Integer"
+        description: "No.（通し番号）"
+      name:
+        type: "String"
+        description: "研究データの名称"
+        required: true
+      summary:
+        type: "Text"
+        description: "研究データの概要"
+      sensitive_data_handling:
+        type: "Text"
+        description: "機微情報がある場合の取り扱い方針"
+      access_policy:
+        type: "Enum"
+        description: "研究データの公開・提供方針"
+        note: "画像ではプルダウン選択式となっているためEnum定義"
+        options:
+          - "公開"
+          - "共有"
+          - "非共有・非公開"
+      access_policy_detail:
+        type: "Text"
+        description: "研究データの公開・提供方針詳細"
+      location:
+        type: "String"
+        description: "研究データの公開・提供場所（URL、DOI）"
+      release_date:
+        type: "Date"
+        description: "研究データ公開日（予定日）"
+    relationships:
+      collected_by:
+        target: "Contributor"
+        description: "研究データの取得者又は収集者"
+        cardinality: "0:N"
+      managed_by:
+        target: "Contributor"
+        description: "研究データの管理者（取得者と異なる場合のみ記入）"
+        cardinality: "0:1"
