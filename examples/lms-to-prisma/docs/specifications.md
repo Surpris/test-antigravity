@@ -38,6 +38,7 @@ graph LR
 - **Parser:** `yaml` (npm package)
 - **Validation:** `ajv` (JSON Schema Validator) - `logical_model_schema.json` を使用
 - **Output:** String Builder (または `prisma-ast` ライブラリの採用を検討)
+  - Prisma のバージョンは v6 または v5 の最新版のうち、安定性や他の NPM パッケージとの相性を考慮して選択する。
 
 ---
 
