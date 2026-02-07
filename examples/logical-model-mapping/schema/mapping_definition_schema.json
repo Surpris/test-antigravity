@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Logical Data Model Mapping Definition Schema",
+  "description": "Schema for defining transformation rules between two logical data models.",
+  "type": "object",
+  "required": ["mapping_id", "source_model", "target_model", "entity_mappings"],
+  "properties": {
+    "mapping_id": {
+      "type": "string",
+      "description": "Unique identifier for this mapping configuration."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the mapping purpose."
+    },
+    "source_model": {
+      "type": "string",
+      "description": "Name of the source data model (must match model_name in source YAML)."
+    },
+    "target_model": {
+      "type": "string",
+      "description": "Name of the target data model (must match model_name in target YAML)."
+    },
+    "entity_mappings": {
+      "type": "array",
+      "description": "List of mapping rules for entities.",
+      "items": {
+        "$ref": "#/definitions/entity_mapping"
+      }
+    }
+  },
+  "definitions": {
+    "entity_mapping": {
+      "type": "object",
+      "description": "Mapping rule between a source entity and a target entity.",
+      "required": ["source_selector", "target_selector"],
+      "properties": {
+        "source_selector": {
+          "$ref": "#/definitions/selector",
+          "description": "Criteria to select the source entity (by Name or Context)."
+        },
+        "target_selector": {
+          "$ref": "#/definitions/selector",
+          "description": "Criteria to select the target entity."
+        },
+        "description": {
+          "type": "string",
+          "description": "Note about this specific entity mapping."
+        },
+        "attribute_mappings": {
+          "type": "array",
+          "description": "Rules for mapping attributes within this entity.",
+          "items": {
+            "$ref": "#/definitions/attribute_mapping"
+          }
+        },
+        "relationship_mappings": {
+          "type": "array",
+          "description": "Rules for mapping relationships originating from this entity.",
+          "items": {
+            "$ref": "#/definitions/relationship_mapping"
+          }
+        }
+      }
+    },
+    "selector": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Entity Name (e.g., 'Project')."
+        },
+        "context": {
+          "type": "string",
+          "format": "uri",
+          "description": "Semantic Context URI (e.g., 'http://schema.org/ResearchProject')."
+        }
+      },
+      "oneOf": [
+        { "required": ["name"] },
+        { "required": ["context"] }
+      ],
+      "description": "Select by Name OR Context URI."
+    },
+    "attribute_mapping": {
+      "type": "object",
+      "required": ["source_attribute"],
+      "properties": {
+        "source_attribute": {
+          "type": "string",
+          "description": "Name of the attribute in the source entity."
+        },
+        "target_attribute": {
+          "type": "string",
+          "description": "Name of the attribute in the target entity. Required unless rule is 'ignore'."
+        },
+        "target_path": {
+          "type": "string",
+          "description": "Dot-notation path for nested structures (e.g., 'has_access_right.access_type'). Use this when mapping a flat attribute to a related entity's attribute."
+        },
+        "rule": {
+          "type": "string",
+          "enum": ["direct_copy", "static_value", "map_values", "ignore"],
+          "default": "direct_copy",
+          "description": "Transformation rule type."
+        },
+        "static_value": {
+          "description": "Fixed value to use when rule is 'static_value'.",
+          "type": ["string", "number", "boolean", "null"]
+        },
+        "value_map": {
+          "type": "object",
+          "description": "Key-value pairs for translating enum values (Source Value -> Target Value).",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "relationship_mapping": {
+      "type": "object",
+      "required": ["source_relationship", "target_relationship"],
+      "properties": {
+        "source_relationship": {
+          "type": "string",
+          "description": "Name of the relationship in the source entity."
+        },
+        "target_relationship": {
+          "type": "string",
+          "description": "Name of the relationship in the target entity."
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["same", "inverse"],
+          "default": "same",
+          "description": "Indicates if the relationship direction is inverted in the target model."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of relationship mapping logic."
+        }
+      }
+    }
+  }
+}
