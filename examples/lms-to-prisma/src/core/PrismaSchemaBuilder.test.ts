@@ -100,25 +100,75 @@ describe('PrismaSchemaBuilder', () => {
     it('should resolve 1:N relationships', () => {
       const schema: LogicalDataModelIntermediateRepresentationSchema = {
         schema_version: "1.0",
-        model_name: 'TestModel',
+        model_name: "TestModel",
         entities: {
           Project: {
-            description: 'Project',
+            description: "Project",
             attributes: {
-              name: { type: 'String', description: 'Name', required: true }
+              name: { type: "String", description: "Name", required: true },
             },
             relationships: {
               datasets: {
-                target: 'Dataset',
-                cardinality: '1:N',
-                description: 'Project Datasets'
-              }
-            }
+                target: "Dataset",
+                cardinality: "1:N",
+                description: "Project Datasets",
+              },
+            },
           },
+          Dataset: {
+            description: "Dataset",
+            attributes: {
+              title: { type: "String", description: "Title", required: true },
+            },
+          },
+        },
+      };
+
+      const builder = new PrismaSchemaBuilder();
+      const result = builder.build(schema);
+
+      // Check Project
+      expect(result).toContain("model Project {");
+      expect(result).toContain("datasets Dataset[]");
+
+      // Check Dataset
+      expect(result).toContain("model Dataset {");
+      // We expect the back-reference to be automatically generated.
+      // The field name 'project' is derived from the source entity 'Project'.
+      expect(result).toContain(
+        "project Project @relation(fields: [projectId], references: [id])"
+      );
+      expect(result).toContain("projectId String");
+    });
+
+    it('should flatten attributes from 0:1 relationships (BelongsTo) into the source model', () => {
+      const schema: LogicalDataModelIntermediateRepresentationSchema = {
+        schema_version: "1.0",
+        model_name: 'TestModel',
+        entities: {
           Dataset: {
             description: 'Dataset',
             attributes: {
-              title: { type: 'String', description: 'Title', required: true }
+              title: { type: 'String', description: 'Title' }
+            },
+            relationships: {
+              managed_by: {
+                target: 'Contributor',
+                cardinality: '0:1',
+                description: 'Managed By',
+                attributes: {
+                  managed_from: {
+                    type: 'Date',
+                    description: 'Managed Since'
+                  }
+                }
+              }
+            }
+          },
+          Contributor: {
+            description: 'Contributor',
+            attributes: {
+              name: { type: 'String', description: 'Name' }
             }
           }
         }
@@ -127,16 +177,61 @@ describe('PrismaSchemaBuilder', () => {
       const builder = new PrismaSchemaBuilder();
       const result = builder.build(schema);
 
-      // Check Project
-      expect(result).toContain('model Project {');
-      expect(result).toContain('datasets Dataset[]');
-
-      // Check Dataset
+      // Dataset should have the FK and the flattened attribute
       expect(result).toContain('model Dataset {');
-      // We expect the back-reference to be automatically generated.
-      // The field name 'project' is derived from the source entity 'Project'.
+      expect(result).toContain('managedBy Contributor? @relation(fields: [managedById], references: [id])');
+      expect(result).toContain('managedById String?');
+      expect(result).toContain('managedFrom DateTime? @db.Date');
+      
+      // Contributor should have the inverse relation (Assuming 1:N inverse for now, or 1:1? Spec is vague on inverse of 0:1. Usually it's inferred as 1:N unless specified otherwise)
+      // If Dataset says "I am managed by Contributor", then Contributor "manages Datasets".
+      expect(result).toContain('model Contributor {');
+      // The inverse name might be 'datasets' if pluralized, or 'dataset' if singular. 
+      // Current implementation logic for back-reference names needs to be checked or inferred.
+      // But for this test, we care about the flattened attribute.
+    });
+
+    it('should flatten attributes from 1:N relationships into the target model (Many side)', () => {
+      const schema: LogicalDataModelIntermediateRepresentationSchema = {
+        schema_version: "1.0",
+        model_name: 'TestModel',
+        entities: {
+          Project: {
+            description: 'Project',
+            attributes: {
+              name: { type: 'String', description: 'Name' }
+            },
+            relationships: {
+              datasets: {
+                target: 'Dataset',
+                cardinality: '1:N',
+                description: 'Project Datasets',
+                attributes: {
+                  added_at: {
+                     type: 'DateTime',
+                     description: 'Date added to project'
+                  }
+                }
+              }
+            }
+          },
+          Dataset: {
+            description: 'Dataset',
+            attributes: {
+              title: { type: 'String', description: 'Title' }
+            }
+          }
+        }
+      };
+      
+      const builder = new PrismaSchemaBuilder();
+      const result = builder.build(schema);
+
+      // Dataset is the Target (Many side), so it gets the FK and the attribute
+      expect(result).toContain('model Dataset {');
       expect(result).toContain('project Project @relation(fields: [projectId], references: [id])');
       expect(result).toContain('projectId String');
+      expect(result).toContain('addedAt DateTime');
     });
   });
 });

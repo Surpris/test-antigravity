@@ -56,6 +56,47 @@ export class PrismaSchemaBuilder {
 
           this.addRelationField(targetEntityName, targetFkField);
           this.addRelationField(targetEntityName, targetRelationField);
+
+          // 3. Flatten attributes to Target (Many side)
+          if (rel.attributes) {
+             const targetEntity = entities[targetEntityName];
+             if (targetEntity) {
+                for (const [attrName, attr] of Object.entries(rel.attributes)) {
+                   targetEntity.attributes[attrName] = attr;
+                }
+             }
+          }
+        } else if (rel.cardinality === '0:1') {
+          // Source (Zero/One) -> Target (One) (BelongsTo)
+          // Source: entityName (e.g. Dataset)
+          // Target: rel.target (e.g. Contributor)
+          // relName: managed_by
+
+          // 1. Add fields to Source: "managedBy Contributor? @relation..."
+          // Relation Name: camelCase(relName) -> managedBy
+          const relFieldBase = this.toCamelCase(relName);
+          const fkName = `${relFieldBase}Id`;
+          
+          const sourceRelationField = `${relFieldBase} ${rel.target}? @relation(fields: [${fkName}], references: [id])`;
+          const sourceFkField = `${fkName} String?`;
+
+          this.addRelationField(entityName, sourceFkField);
+          this.addRelationField(entityName, sourceRelationField);
+
+          // 2. Add field to Target: "datasets Dataset[]"
+          // Inverse name: camelCase(entityName) + 's' (Simple pluralization)
+          const targetEntityName = rel.target;
+          const inverseName = this.toCamelCase(entityName) + 's';
+          const targetField = `${inverseName} ${entityName}[]`;
+          
+          this.addRelationField(targetEntityName, targetField);
+
+          // 3. Flatten attributes to Source (FK holder side)
+          if (rel.attributes) {
+            for (const [attrName, attr] of Object.entries(rel.attributes)) {
+              entity.attributes[attrName] = attr;
+            }
+          }
         }
       }
     }
