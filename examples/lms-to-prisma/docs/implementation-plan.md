@@ -4,6 +4,7 @@
 
 - 本プロジェクトの仕様書である [specifications.md](./specifications.md) を通読すること。
 - 本プロジェクトでは @.agent/rules/testing.md を遵守し、テスト駆動開発を実施すること。
+- serena MCP を用いてコードベースの管理および開発状況を把握すること。
 - 必要に応じて、context7 MCP を利用してライブラリの概要や設計、使用方法を確認すること。
 
 ## 0. 事前準備・環境定義
