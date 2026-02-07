@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Logical Data Model Intermediate Representation Schema",
+  "description": "Schema for defining logical data models in YAML, designed for RDB/Graph neutral representation.",
+  "type": "object",
+  "required": ["schema_version", "model_name", "entities"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Version of this schema definition."
+    },
+    "model_name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_]+$",
+      "description": "Unique name for the data model (Alphanumeric and underscores)."
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the entire data model."
+    },
+    "entities": {
+      "type": "object",
+      "description": "Collection of entities defined in the model.",
+      "patternProperties": {
+        "^[A-Z][a-zA-Z0-9]*$": {
+          "$ref": "#/definitions/entity"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "entity": {
+      "type": "object",
+      "required": ["description", "attributes"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "Description of the entity, including source references."
+        },
+        "attributes": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "$ref": "#/definitions/attribute"
+            }
+          },
+          "additionalProperties": false
+        },
+        "relationships": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "$ref": "#/definitions/relationship"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "attribute": {
+      "type": "object",
+      "required": ["type", "description"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "String",
+            "Integer",
+            "Float",
+            "Boolean",
+            "Date",
+            "DateTime",
+            "Text",
+            "Enum"
+          ],
+          "description": "Data type of the attribute."
+        },
+        "description": {
+          "type": "string",
+          "description": "Business definition of the attribute."
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "primary_key": {
+          "type": "boolean",
+          "default": false
+        },
+        "note": {
+          "type": "string",
+          "description": "Additional implementation notes or constraints."
+        },
+        "options": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of allowed values if type is Enum."
+        }
+      },
+      "if": {
+        "properties": { "type": { "const": "Enum" } }
+      },
+      "then": {
+        "required": ["options"]
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "required": ["target", "cardinality"],
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Name of the target entity (Must match an entity key)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the relationship context."
+        },
+        "cardinality": {
+          "type": "string",
+          "enum": ["1:1", "1:N", "0:1", "0:N", "N:M"],
+          "description": "Cardinality from the source entity to the target entity."
+        },
+        "attributes": {
+          "type": "object",
+          "description": "Properties/Attributes specifically for this relationship (edge properties).",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "$ref": "#/definitions/attribute"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  }
+}
