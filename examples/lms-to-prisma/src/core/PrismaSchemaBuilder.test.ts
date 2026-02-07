@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { PrismaSchemaBuilder } from './PrismaSchemaBuilder';
-import { Entity } from '../types/logical_model';
+import { Entity, LogicalDataModelIntermediateRepresentationSchema } from '../types/logical_model';
 
 describe('PrismaSchemaBuilder', () => {
   describe('convertEntity', () => {
@@ -69,6 +69,74 @@ describe('PrismaSchemaBuilder', () => {
       
       // Expected Enum Name: ProjectRoleInProject
       expect(result).toContain('roleInProject ProjectRoleInProject?');
+    });
+    it('should generate Enum definitions', () => {
+      const entityName = 'Dataset';
+      const entity: Entity = {
+        description: 'Dataset Entity',
+        attributes: {
+          access_policy: {
+            type: 'Enum',
+            description: 'Access Policy',
+            options: ['Public', 'Private', 'Embargoed'],
+          },
+        },
+      };
+
+      const builder = new PrismaSchemaBuilder();
+      const enums = builder.generateEnums(entityName, entity);
+      
+      expect(enums).toHaveLength(1);
+      const enumDef = enums[0];
+      expect(enumDef).toContain('enum DatasetAccessPolicy {');
+      expect(enumDef).toContain('Public');
+      expect(enumDef).toContain('Private');
+      expect(enumDef).toContain('Embargoed');
+      expect(enumDef).toContain('}');
+    });
+  });
+
+  describe('build', () => {
+    it('should resolve 1:N relationships', () => {
+      const schema: LogicalDataModelIntermediateRepresentationSchema = {
+        schema_version: "1.0",
+        model_name: 'TestModel',
+        entities: {
+          Project: {
+            description: 'Project',
+            attributes: {
+              name: { type: 'String', description: 'Name', required: true }
+            },
+            relationships: {
+              datasets: {
+                target: 'Dataset',
+                cardinality: '1:N',
+                description: 'Project Datasets'
+              }
+            }
+          },
+          Dataset: {
+            description: 'Dataset',
+            attributes: {
+              title: { type: 'String', description: 'Title', required: true }
+            }
+          }
+        }
+      };
+
+      const builder = new PrismaSchemaBuilder();
+      const result = builder.build(schema);
+
+      // Check Project
+      expect(result).toContain('model Project {');
+      expect(result).toContain('datasets Dataset[]');
+
+      // Check Dataset
+      expect(result).toContain('model Dataset {');
+      // We expect the back-reference to be automatically generated.
+      // The field name 'project' is derived from the source entity 'Project'.
+      expect(result).toContain('project Project @relation(fields: [projectId], references: [id])');
+      expect(result).toContain('projectId String');
     });
   });
 });

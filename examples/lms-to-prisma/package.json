@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b --noEmit",
     "gen:types": "json2ts schema/logical_model_schema.json > src/types/logical_model.ts"
   },
   "keywords": [],
