@@ -1,0 +1,11 @@
+model UserDefinedRelationship {
+  id        String   @id @default(uuid())
+  sourceId  String
+  targetId  String
+  type      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([sourceId])
+  @@index([targetId])
+}

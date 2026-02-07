@@ -13,7 +13,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "typecheck": "npm run lint:fix && tsc -b --noEmit",
-    "gen:types": "json2ts schema/logical_model_schema.json > src/types/logical_model.ts"
+    "gen:types": "json2ts schema/logical_model_schema.json > src/types/logical_model.ts",
+    "generate:schema": "ts-node src/index.ts"
   },
   "keywords": [],
   "author": "",

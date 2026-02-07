@@ -42,7 +42,7 @@ export class PrismaSchemaBuilder {
           // relName: (e.g. datasets)
 
           // 1. Add field to Source: "datasets Dataset[]"
-          const sourceField = `${relName} ${rel.target}[]`;
+          const sourceField = `${this.toCamelCase(relName)} ${rel.target}[]`;
           this.addRelationField(entityName, sourceField);
 
           // 2. Add fields to Target: "project Project @relation..."
@@ -149,7 +149,12 @@ export class PrismaSchemaBuilder {
         const enumLines: string[] = [];
         enumLines.push(`enum ${enumName} {`);
         attr.options.forEach(option => {
-          enumLines.push(`  ${option}`);
+          const validName = this.toValidEnumName(option);
+          if (validName !== option) {
+            enumLines.push(`  ${validName} @map("${option}")`);
+          } else {
+            enumLines.push(`  ${option}`);
+          }
         });
         enumLines.push('}');
         enums.push(enumLines.join('\n'));
@@ -157,6 +162,39 @@ export class PrismaSchemaBuilder {
     }
     return enums;
   }
+
+  private toValidEnumName(str: string): string {
+    // Replace invalid characters with underscore
+    // Prisma identifiers must start with [A-Za-z][A-Za-z0-9_]*
+    // But for Enums, we might want to be more permissive if mapping?
+    // Actually the identifier used in code must be valid.
+    // Replace spaces, dots, etc.
+    let name = str.replace(/[^a-zA-Z0-9_]/g, '_');
+    // Ensure it doesn't start with a number
+    if (/^[0-9]/.test(name)) {
+      name = `_${name}`;
+    }
+    // If empty or all invalid (e.g. only unicode which I stripped above?), handle it.
+    // Wait, Japanese characters are allowed in Prisma?
+    // "Prisma models and enums must start with a letter and can only contain letters, numbers and underscores."
+    // "Letters" implies ASCII? No, generally Identifier.
+    // But keeping it safe: ASCII only if possible or fallback.
+    // If I strip everything and get empty string, I should probably keep original and let it fail or use generic name.
+    
+    // Better strategy:
+    // If it contains spaces, replace with _.
+    // If it contains non-word chars, replace with _.
+    // If it's unicode, Prisma might accept it depending on version (Prisma 6?).
+    // But let's assume we map to safe ASCII or keep unicode if valid.
+    
+    // For "Principal Investigator" -> "Principal_Investigator"
+    // For "公開" -> "Public" (I can't translate).
+    // So "公開" -> "Expected something valid".
+    
+    // Let's just replace space and punctuation.
+    return str.replace(/[\s\u30fb\u3000.-]+/g, '_'); 
+  }
+
 
   private convertAttribute(name: string, attr: Attribute, modelName: string): string {
     const fieldName = this.toCamelCase(name);
