@@ -1,5 +1,7 @@
 # 論理データモデル to Prisma Generator 実装計画書
 
+**MUST: 本プロジェクトでは @.agent/rules/testing.md を遵守し、テスト駆動開発を実施すること。**
+
 ## 0. 事前準備・環境定義
 
 - **Target:** `schema.prisma` (Prisma v6)
