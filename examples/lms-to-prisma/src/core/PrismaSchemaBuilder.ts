@@ -1,7 +1,16 @@
+
 import { Entity, Attribute, LogicalDataModelIntermediateRepresentationSchema } from '../types/logical_model';
 
 export class PrismaSchemaBuilder {
   private generatedRelationFields: Map<string, string[]> = new Map();
+
+  // Prisma & TypeScript reserved words
+  private readonly reservedWords = new Set([
+    'model', 'enum', 'type', 'interface', 'class', 'var', 'let', 'const', 
+    'if', 'else', 'function', 'return', 'import', 'export', 'from', 
+    'true', 'false', 'null', 'undefined', 'async', 'await', 
+    'datasource', 'generator', 'String', 'Int', 'Float', 'Boolean', 'DateTime', 'Json'
+  ]);
 
   build(schema: LogicalDataModelIntermediateRepresentationSchema): string {
     this.generatedRelationFields.clear();
@@ -35,29 +44,28 @@ export class PrismaSchemaBuilder {
       if (!entity.relationships) continue;
 
       for (const [relName, rel] of Object.entries(entity.relationships)) {
+        // Explicit relation name to handle multiple relations between same models
+        const relationName = this.toPascalCase(relName); 
+        
         if (rel.cardinality === '1:N') {
           // Source (One) -> Target (Many)
-          // Source: entityName (e.g. Project)
-          // Target: rel.target (e.g. Dataset)
-          // relName: (e.g. datasets)
-
-          // 1. Add field to Source: "datasets Dataset[]"
-          const sourceField = `${this.toCamelCase(relName)} ${rel.target}[]`;
+          const sourceField = `${this.toSafeCamelCase(relName)} ${this.toSafePascalCase(rel.target)}[] @relation("${relationName}")`;
           this.addRelationField(entityName, sourceField);
 
-          // 2. Add fields to Target: "project Project @relation..."
-          // Infer back-reference name
+          // Target (Many) -> Source (One)
           const targetEntityName = rel.target;
-          const backRefName = this.toCamelCase(entityName); // project
-          const fkName = `${backRefName}Id`; // projectId
           
-          const targetRelationField = `${backRefName} ${entityName} @relation(fields: [${fkName}], references: [id])`;
-          const targetFkField = `${fkName} String`; // Assuming ID is String (UUID)
+          // Back-reference naming: <relName><SourceEntity> to ensure uniqueness
+          // e.g. createdTasksUser
+          const backRefName = this.toSafeCamelCase(relName) + this.toSafePascalCase(entityName);
+          const fkName = `${backRefName}Id`; 
+          
+          const targetRelationField = `${backRefName} ${this.toSafePascalCase(entityName)} @relation("${relationName}", fields: [${fkName}], references: [id])`;
+          const targetFkField = `${fkName} String`;
 
           this.addRelationField(targetEntityName, targetFkField);
           this.addRelationField(targetEntityName, targetRelationField);
 
-          // 3. Flatten attributes to Target (Many side)
           if (rel.attributes) {
              const targetEntity = entities[targetEntityName];
              if (targetEntity) {
@@ -68,30 +76,25 @@ export class PrismaSchemaBuilder {
           }
         } else if (rel.cardinality === '0:1') {
           // Source (Zero/One) -> Target (One) (BelongsTo)
-          // Source: entityName (e.g. Dataset)
-          // Target: rel.target (e.g. Contributor)
-          // relName: managed_by
-
-          // 1. Add fields to Source: "managedBy Contributor? @relation..."
-          // Relation Name: camelCase(relName) -> managedBy
-          const relFieldBase = this.toCamelCase(relName);
+          
+          const relFieldBase = this.toSafeCamelCase(relName);
           const fkName = `${relFieldBase}Id`;
           
-          const sourceRelationField = `${relFieldBase} ${rel.target}? @relation(fields: [${fkName}], references: [id])`;
+          const sourceRelationField = `${relFieldBase} ${this.toSafePascalCase(rel.target)}? @relation("${relationName}", fields: [${fkName}], references: [id])`;
           const sourceFkField = `${fkName} String?`;
 
           this.addRelationField(entityName, sourceFkField);
           this.addRelationField(entityName, sourceRelationField);
 
-          // 2. Add field to Target: "datasets Dataset[]"
-          // Inverse name: camelCase(entityName) + 's' (Simple pluralization)
+          // Target -> Source (Many)
           const targetEntityName = rel.target;
-          const inverseName = this.toCamelCase(entityName) + 's';
-          const targetField = `${inverseName} ${entityName}[]`;
+          
+          // Inverse naming: <relName><SourceEntity>s (plural)
+          const inverseName = this.toSafeCamelCase(relName) + this.toSafePascalCase(entityName) + 's';
+          const targetField = `${inverseName} ${this.toSafePascalCase(entityName)}[] @relation("${relationName}")`;
           
           this.addRelationField(targetEntityName, targetField);
 
-          // 3. Flatten attributes to Source (FK holder side)
           if (rel.attributes) {
             for (const [attrName, attr] of Object.entries(rel.attributes)) {
               entity.attributes[attrName] = attr;
@@ -110,24 +113,21 @@ export class PrismaSchemaBuilder {
   }
 
   convertEntity(entityName: string, entity: Entity): string {
-    const modelName = this.toPascalCase(entityName);
+    const modelName = this.toSafePascalCase(entityName);
     const lines: string[] = [];
 
     lines.push(`model ${modelName} {`);
 
-    // System Fields Injection
     lines.push('  id String @id @default(uuid())');
     lines.push('  createdAt DateTime @default(now())');
     lines.push('  updatedAt DateTime @updatedAt');
     lines.push('  deletedAt DateTime?');
 
-    // Attributes Processing
     for (const [key, attr] of Object.entries(entity.attributes)) {
       const fieldLine = this.convertAttribute(key, attr, modelName);
       lines.push(`  ${fieldLine}`);
     }
 
-    // Generated Relation Fields
     if (this.generatedRelationFields.has(entityName)) {
       const relFields = this.generatedRelationFields.get(entityName);
       relFields?.forEach(field => {
@@ -141,15 +141,31 @@ export class PrismaSchemaBuilder {
 
   generateEnums(entityName: string, entity: Entity): string[] {
     const enums: string[] = [];
-    const modelName = this.toPascalCase(entityName);
+    const modelName = this.toSafePascalCase(entityName);
 
     for (const [key, attr] of Object.entries(entity.attributes)) {
       if (attr.type === 'Enum' && attr.options) {
         const enumName = `${modelName}${this.toPascalCase(key)}`;
         const enumLines: string[] = [];
         enumLines.push(`enum ${enumName} {`);
-        attr.options.forEach(option => {
-          const validName = this.toValidEnumName(option);
+        
+        const usedNames = new Set<string>();
+
+        attr.options.forEach((option, index) => {
+          let validName = this.toValidEnumName(option);
+
+          // Fallback if invalid (empty, just underscores, or doesn't start with letter)
+          // Prisma Enum values must start with a letter [A-Za-z]
+          if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(validName)) {
+             validName = `Option_${index + 1}`;
+          }
+
+          // Ensure uniqueness
+          if (usedNames.has(validName)) {
+             validName = `${validName}_${index + 1}`;
+          }
+          usedNames.add(validName);
+
           if (validName !== option) {
             enumLines.push(`  ${validName} @map("${option}")`);
           } else {
@@ -164,55 +180,32 @@ export class PrismaSchemaBuilder {
   }
 
   private toValidEnumName(str: string): string {
-    // Replace invalid characters with underscore
-    // Prisma identifiers must start with [A-Za-z][A-Za-z0-9_]*
-    // But for Enums, we might want to be more permissive if mapping?
-    // Actually the identifier used in code must be valid.
-    // Replace spaces, dots, etc.
-    let name = str.replace(/[^a-zA-Z0-9_]/g, '_');
-    // Ensure it doesn't start with a number
-    if (/^[0-9]/.test(name)) {
-      name = `_${name}`;
-    }
-    // If empty or all invalid (e.g. only unicode which I stripped above?), handle it.
-    // Wait, Japanese characters are allowed in Prisma?
-    // "Prisma models and enums must start with a letter and can only contain letters, numbers and underscores."
-    // "Letters" implies ASCII? No, generally Identifier.
-    // But keeping it safe: ASCII only if possible or fallback.
-    // If I strip everything and get empty string, I should probably keep original and let it fail or use generic name.
+    // Replace spaces and specific separators with underscore
+    let name = str.replace(/[\s\u30fb\u3000.-]+/g, '_'); 
+    // Replace non-alphanumeric with nothing (or underscore? duplicate underscores are ugly)
+    name = name.replace(/[^a-zA-Z0-9_]/g, '_');
     
-    // Better strategy:
-    // If it contains spaces, replace with _.
-    // If it contains non-word chars, replace with _.
-    // If it's unicode, Prisma might accept it depending on version (Prisma 6?).
-    // But let's assume we map to safe ASCII or keep unicode if valid.
-    
-    // For "Principal Investigator" -> "Principal_Investigator"
-    // For "公開" -> "Public" (I can't translate).
-    // So "公開" -> "Expected something valid".
-    
-    // Let's just replace space and punctuation.
-    return str.replace(/[\s\u30fb\u3000.-]+/g, '_'); 
+    // Collapse multiple underscores
+    name = name.replace(/_+/g, '_');
+    // Trim underscores
+    name = name.replace(/^_+|_+$/g, '');
+
+    return name;
   }
 
-
   private convertAttribute(name: string, attr: Attribute, modelName: string): string {
-    const fieldName = this.toCamelCase(name);
+    const fieldName = this.toSafeCamelCase(name);
     const prismaType = this.mapType(attr.type, modelName, name);
     
-    // Determine optionality
-    // primary_key implies required
     const isRequired = attr.required || attr.primary_key;
     const typeSuffix = isRequired ? '' : '?';
 
     let line = `${fieldName} ${prismaType}${typeSuffix}`;
 
-    // Modifiers
     if (attr.primary_key) {
       line += ' @unique';
     }
     
-    // Type specific modifiers
     if (attr.type === 'Text') {
       line += ' @db.Text';
     }
@@ -233,7 +226,7 @@ export class PrismaSchemaBuilder {
       case 'DateTime': return 'DateTime';
       case 'Text': return 'String';
       case 'Enum': return `${modelName}${this.toPascalCase(attrName)}`;
-      default: return 'String'; // Fallback
+      default: return 'String';
     }
   }
 
@@ -247,5 +240,21 @@ export class PrismaSchemaBuilder {
     return str
       .replace(/[-_](\w)/g, (_, c) => c.toUpperCase())
       .replace(/^\w/, c => c.toLowerCase());
+  }
+
+  private toSafePascalCase(str: string): string {
+    const pascal = this.toPascalCase(str);
+    if (this.reservedWords.has(pascal) || this.reservedWords.has(pascal.toLowerCase())) {
+      return `${pascal}_`;
+    }
+    return pascal;
+  }
+
+  private toSafeCamelCase(str: string): string {
+    const camel = this.toCamelCase(str);
+    if (this.reservedWords.has(camel) || this.reservedWords.has(camel.toLowerCase())) {
+      return `${camel}_`;
+    }
+    return camel;
   }
 }

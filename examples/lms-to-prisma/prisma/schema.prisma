@@ -17,9 +17,9 @@ enum ContributorRoleInProject {
 }
 
 enum DatasetAccessPolicy {
-  公開
-  共有
-  非共有_非公開 @map("非共有・非公開")
+  Option_1 @map("公開")
+  Option_2 @map("共有")
+  Option_3 @map("非共有・非公開")
 }
 
 model DMPMetadata {
@@ -37,8 +37,8 @@ model Project {
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
   projectNumber String @unique
-  hasContributors Contributor[]
-  hasDatasets Dataset[]
+  hasContributors Contributor[] @relation("HasContributors")
+  hasDatasets Dataset[] @relation("HasDatasets")
 }
 
 model Contributor {
@@ -49,9 +49,9 @@ model Contributor {
   contributorId String @unique
   name String
   roleInProject ContributorRoleInProject?
-  projectId String
-  project Project @relation(fields: [projectId], references: [id])
-  datasets Dataset[]
+  hasContributorsProjectId String
+  hasContributorsProject Project @relation("HasContributors", fields: [hasContributorsProjectId], references: [id])
+  managedByDatasets Dataset[] @relation("ManagedBy")
 }
 
 model Dataset {
@@ -64,10 +64,10 @@ model Dataset {
   accessPolicy DatasetAccessPolicy?
   managedFrom DateTime? @db.Date
   managedTo DateTime? @db.Date
-  projectId String
-  project Project @relation(fields: [projectId], references: [id])
+  hasDatasetsProjectId String
+  hasDatasetsProject Project @relation("HasDatasets", fields: [hasDatasetsProjectId], references: [id])
   managedById String?
-  managedBy Contributor? @relation(fields: [managedById], references: [id])
+  managedBy Contributor? @relation("ManagedBy", fields: [managedById], references: [id])
 }
 
 

@@ -1,3 +1,4 @@
+
 import { describe, it, expect } from 'vitest';
 import { PrismaSchemaBuilder } from './PrismaSchemaBuilder';
 import { Entity, LogicalDataModelIntermediateRepresentationSchema } from '../types/logical_model';
@@ -129,16 +130,17 @@ describe('PrismaSchemaBuilder', () => {
 
       // Check Project
       expect(result).toContain("model Project {");
-      expect(result).toContain("datasets Dataset[]");
+      expect(result).toContain('datasets Dataset[] @relation("Datasets")');
 
       // Check Dataset
       expect(result).toContain("model Dataset {");
-      // We expect the back-reference to be automatically generated.
-      // The field name 'project' is derived from the source entity 'Project'.
+      
+      // We expect the back-reference to be generated with robust naming.
+      // <relName><Source> -> "datasetsProject"
       expect(result).toContain(
-        "project Project @relation(fields: [projectId], references: [id])"
+        'datasetsProject Project @relation("Datasets", fields: [datasetsProjectId], references: [id])'
       );
-      expect(result).toContain("projectId String");
+      expect(result).toContain("datasetsProjectId String");
     });
 
     it('should flatten attributes from 0:1 relationships (BelongsTo) into the source model', () => {
@@ -179,16 +181,15 @@ describe('PrismaSchemaBuilder', () => {
 
       // Dataset should have the FK and the flattened attribute
       expect(result).toContain('model Dataset {');
-      expect(result).toContain('managedBy Contributor? @relation(fields: [managedById], references: [id])');
+      // Rel name "ManagedBy" from "managed_by"
+      expect(result).toContain('managedBy Contributor? @relation("ManagedBy", fields: [managedById], references: [id])');
       expect(result).toContain('managedById String?');
       expect(result).toContain('managedFrom DateTime? @db.Date');
       
-      // Contributor should have the inverse relation (Assuming 1:N inverse for now, or 1:1? Spec is vague on inverse of 0:1. Usually it's inferred as 1:N unless specified otherwise)
-      // If Dataset says "I am managed by Contributor", then Contributor "manages Datasets".
+      // Contributor should have the inverse relation
+      // Inverse logic: <relName><Source>s -> managedByDatasets
       expect(result).toContain('model Contributor {');
-      // The inverse name might be 'datasets' if pluralized, or 'dataset' if singular. 
-      // Current implementation logic for back-reference names needs to be checked or inferred.
-      // But for this test, we care about the flattened attribute.
+      expect(result).toContain('managedByDatasets Dataset[] @relation("ManagedBy")');
     });
 
     it('should flatten attributes from 1:N relationships into the target model (Many side)', () => {
@@ -229,8 +230,10 @@ describe('PrismaSchemaBuilder', () => {
 
       // Dataset is the Target (Many side), so it gets the FK and the attribute
       expect(result).toContain('model Dataset {');
-      expect(result).toContain('project Project @relation(fields: [projectId], references: [id])');
-      expect(result).toContain('projectId String');
+      // "Datasets" relation name
+      // BackRef: datasetsProject
+      expect(result).toContain('datasetsProject Project @relation("Datasets", fields: [datasetsProjectId], references: [id])');
+      expect(result).toContain('datasetsProjectId String');
       expect(result).toContain('addedAt DateTime');
     });
   });
