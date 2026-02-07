@@ -8,6 +8,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "types": ["node", "vitest/globals"]
   },
   "include": ["src", "tests"],

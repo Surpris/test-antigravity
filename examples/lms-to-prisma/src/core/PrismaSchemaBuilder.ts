@@ -1,4 +1,4 @@
-import { Entity, Attribute, LogicalDataModelIntermediateRepresentationSchema, Relationship } from '../types/logical_model';
+import { Entity, Attribute, LogicalDataModelIntermediateRepresentationSchema } from '../types/logical_model';
 
 export class PrismaSchemaBuilder {
   private generatedRelationFields: Map<string, string[]> = new Map();
