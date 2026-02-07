@@ -1,0 +1,109 @@
+mapping_id: "DMP_to_CAO_Mapping_v0.1"
+description: "科学研究費DMPモデルから内閣府メタデータ標準モデルへの変換定義"
+source_model: "ResearchDataManagementPlan_LogicalModel"
+target_model: "ResearchDataManagement_LogicalModel"
+
+entity_mappings:
+  # ---------------------------------------------------------
+  # 1. Project (研究プロジェクト) のマッピング
+  # ---------------------------------------------------------
+  - description: "研究プロジェクト情報のマッピング。DMP側のIDはCAO側のFundingProgramのIDへ、名称はProjectの名称へ振り分ける想定。"
+    source_selector:
+      context: "http://schema.org/ResearchProject"
+    target_selector:
+      context: "http://schema.org/ResearchProject"
+    
+    attribute_mappings:
+      # プロジェクト名のマッピング (schema:name 同士)
+      - source_attribute: "project_number"
+        # Note: CAOモデルのProjectにはIDがないため、FundingProgram側のIDにマッピングすべきだが、
+        # ここでは便宜上Projectの構造として記述するか、実装時の分割ルールに委ねる。
+        # 今回は 'ignore' とし、別途 FundingProgram へのマッピングを検討するアプローチをとる
+        rule: "ignore" 
+        target_attribute: "project_name" # Placeholder
+
+    relationship_mappings:
+      # DMP: Project -> has_datasets (schema:result)
+      # CAO: Dataset -> belongs_to_project (schema:isResultOf)
+      # 向きが逆であるため 'inverse' を指定
+      - source_relationship: "has_datasets"
+        target_relationship: "belongs_to_project"
+        direction: "inverse"
+        description: "プロジェクト成果物としてのデータセットの関係性を逆方向に解決"
+
+      # DMP: Project -> has_contributors (schema:member)
+      # CAO: Contributor -> (No direct link to Project in logical model, usually via Dataset)
+      # 対応するリレーションがないため定義しない
+
+  # ---------------------------------------------------------
+  # 2. Dataset (研究データ) のマッピング
+  # ---------------------------------------------------------
+  - description: "データセット詳細情報のマッピング。アクセス方針の構造変換を含む。"
+    source_selector:
+      context: "http://schema.org/Dataset"
+    target_selector:
+      context: "http://schema.org/Dataset"
+
+    attribute_mappings:
+      # 名称: title -> data_name
+      - source_attribute: "title"
+        target_attribute: "data_name"
+        rule: "direct_copy"
+
+      # ID: dataset_no -> data_no
+      - source_attribute: "dataset_no"
+        target_attribute: "data_no"
+        rule: "direct_copy"
+
+      # アクセスポリシーの構造変換と値変換
+      # DMP: access_policy (String/Enum)
+      # CAO: has_access_right (Relation) -> AccessRight.access_type (String/Enum)
+      - source_attribute: "access_policy"
+        target_attribute: "access_type" # ターゲットの最終的な属性名
+        target_path: "has_access_right.access_type" # 構造変換パス
+        rule: "map_values"
+        value_map:
+          "公開": "公開"
+          "共有": "共有"
+          "非共有・非公開": "非公開" # CAOの定義に合わせて変換
+
+    relationship_mappings:
+      # DMP: managed_by (schema:maintainer)
+      # CAO: managed_by_org (schema:maintainer) -> Institution
+      # Note: 個人(Contributor)と組織(Institution)で型が違うため、単純マッピング不可。
+      # 手動対応が必要なため定義から除外、または別途ロジックが必要。
+      
+      # DMP: collected_by (schema:creator)
+      # CAO: created_datasets (inverse of schema:creator)
+      - source_relationship: "collected_by"
+        target_relationship: "created_datasets"
+        direction: "inverse"
+
+  # ---------------------------------------------------------
+  # 3. Contributor (研究者・関与者) のマッピング
+  # ---------------------------------------------------------
+  - description: "研究者情報のマッピング"
+    source_selector:
+      context: "http://schema.org/Person"
+    target_selector:
+      context: "http://schema.org/Person"
+
+    attribute_mappings:
+      - source_attribute: "name"
+        target_attribute: "name"
+        rule: "direct_copy"
+
+      - source_attribute: "contributor_id"
+        target_attribute: "person_id"
+        rule: "direct_copy"
+
+      # 役割 (role_in_project) は CAOモデルの Contributor に直接的な属性がないため無視
+      - source_attribute: "role_in_project"
+        rule: "ignore"
+        target_attribute: "null"
+
+  # ---------------------------------------------------------
+  # 4. DMPMetadata (DMP管理情報) のマッピング (Optional)
+  # ---------------------------------------------------------
+  # CAOモデルに対応するエンティティ（CreativeWork等）が存在しないため記述しない。
+  # 必要であれば、Datasetの備考(remarks)等に転記するルールを記述可能。

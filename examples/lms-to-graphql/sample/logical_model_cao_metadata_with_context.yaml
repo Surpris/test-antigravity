@@ -1,0 +1,208 @@
+schema_version: "1.0"
+model_name: "ResearchDataManagement_LogicalModel"
+description: "研究データのメタデータ管理に関する論理データモデル"
+entities:
+  FundingProgram:
+    description: "資金配分機関および助成プログラムの情報"
+    context: "http://schema.org/MonetaryGrant"
+    attributes:
+      funding_agency:
+        type: "String"
+        description: "資金配分機関情報（名称・英語略称可）"
+        required: true
+        note: "公募型の研究資金以外の場合は記入不要"
+        context: "http://schema.org/funder"
+      program_info_code:
+        type: "String"
+        description: "体系的番号におけるプログラム情報コード"
+        required: false
+        context: "http://schema.org/identifier"
+      program_name:
+        type: "String"
+        description: "プログラム名（競争的研究費制度の名称）"
+        required: false
+        context: "http://schema.org/name"
+      systematic_number:
+        type: "String"
+        description: "体系的番号"
+        required: true
+        primary_key: true
+        note: "公募型の研究資金の場合に付与される番号"
+        context: "http://schema.org/identifier"
+
+  Project:
+    description: "研究プロジェクト（課題）の情報"
+    context: "http://schema.org/ResearchProject"
+    attributes:
+      project_name:
+        type: "String"
+        description: "プロジェクト名（e-Rad課題名称等）"
+        required: true
+        context: "http://schema.org/name"
+    relationships:
+      funded_by:
+        target: "FundingProgram"
+        description: "プロジェクトが採択されているプログラム"
+        cardinality: "0:1"
+        context: "http://schema.org/funding"
+
+  Dataset:
+    description: "管理対象データの詳細メタデータ"
+    context: "http://schema.org/Dataset"
+    attributes:
+      data_no:
+        type: "String"
+        description: "データNo.（管理対象データを特定するための番号）"
+        primary_key: true
+        context: "http://schema.org/identifier"
+      data_name:
+        type: "String"
+        description: "データの名称"
+        required: true
+        context: "http://schema.org/name"
+      published_date:
+        type: "Date"
+        description: "掲載日・掲載更新日"
+        required: true
+        context: "http://schema.org/datePublished"
+      data_description:
+        type: "Text"
+        description: "データの説明"
+        required: true
+        context: "http://schema.org/description"
+      research_field:
+        type: "String"
+        description: "データの分野（e-Radの研究分野）"
+        required: true
+        context: "http://schema.org/about"
+      data_type:
+        type: "Enum"
+        description: "データ種別"
+        required: true
+        options: ["データセット", "その他"]
+        context: "http://schema.org/additionalType"
+      estimated_data_volume:
+        type: "String"
+        description: "概略データ量（容量またはシステム出力値）"
+        required: false
+        context: "http://schema.org/contentSize"
+      usage_policy:
+        type: "Text"
+        description: "管理対象データの利活用・提供方針（ライセンス等）"
+        required: true
+        context: "http://schema.org/license"
+      scheduled_public_date:
+        type: "Date"
+        description: "公開予定日"
+        required: false
+        note: "公開期間猶予を選択した場合に必須"
+        context: "http://purl.org/dc/terms/available"
+      remarks:
+        type: "Text"
+        description: "備考"
+        required: false
+        context: "http://schema.org/comment"
+    relationships:
+      belongs_to_project:
+        target: "Project"
+        description: "データが属するプロジェクト"
+        cardinality: "1:1"
+        context: "http://schema.org/isResultOf"
+      has_access_right:
+        target: "AccessRight"
+        description: "アクセス権の設定"
+        cardinality: "1:1"
+        context: "http://purl.org/dc/terms/accessRights"
+      stored_in:
+        target: "Repository"
+        description: "保存先リポジトリ"
+        cardinality: "1:1"
+        context: "http://schema.org/distribution"
+      managed_by_org:
+        target: "Institution"
+        description: "データの管理機関（法人）"
+        cardinality: "1:1"
+        context: "http://schema.org/maintainer"
+
+  AccessRight:
+    description: "データへのアクセス権限定義"
+    context: "http://purl.org/dc/terms/RightsStatement"
+    attributes:
+      access_type:
+        type: "Enum"
+        description: "アクセス権"
+        required: true
+        options: ["公開", "共有", "非共有", "非公開", "公開期間猶予"]
+        context: "http://schema.org/name"
+
+  Contributor:
+    description: "データの作成者および管理者（個人）"
+    context: "http://schema.org/Person"
+    attributes:
+      person_id:
+        type: "String"
+        description: "システム内一意識別子"
+        primary_key: true
+        context: "http://schema.org/identifier"
+      name:
+        type: "String"
+        description: "氏名（データ作成者またはデータ管理者）"
+        required: true
+        context: "http://schema.org/name"
+      erad_researcher_number:
+        type: "String"
+        description: "e-Rad研究者番号"
+        required: false
+        note: "管理者が組織の場合は不要。非公開希望時を除き管理者として必須。"
+        context: "http://schema.org/identifier"
+      contact_info:
+        type: "Text"
+        description: "連絡先（住所、電話番号、メールアドレス等）"
+        required: false
+        context: "http://schema.org/contactPoint"
+    relationships:
+      created_datasets:
+        target: "Dataset"
+        description: "作成したデータセット"
+        cardinality: "0:N"
+        context: "http://schema.org/creator"
+      manages_datasets:
+        target: "Dataset"
+        description: "管理責任を負うデータセット"
+        cardinality: "0:N"
+        context: "http://schema.org/maintainer"
+
+  Institution:
+    description: "データを管理する機関（法人・組織）"
+    context: "http://schema.org/Organization"
+    attributes:
+      institution_name:
+        type: "String"
+        description: "データ管理機関（法人名）"
+        required: true
+        context: "http://schema.org/name"
+      institution_code:
+        type: "String"
+        description: "データ管理機関コード"
+        required: false
+        context: "http://schema.org/identifier"
+      department_name:
+        type: "String"
+        description: "管理部署名"
+        required: true
+        context: "http://schema.org/department"
+
+Repository:
+    description: "データが保管される場所の情報"
+    context: "http://schema.org/Service"
+    attributes:
+      repository_info:
+        type: "String"
+        description: "現在の、あるいはプロジェクト後のリポジトリ情報"
+        required: true
+        context: "http://schema.org/name"
+      repository_url_doi:
+        type: "String"
+        description: "リポジトリURL・DOIリンク"
+        required: false
+        context: "http://schema.org/url"
