@@ -127,7 +127,7 @@ describe('PrismaSchemaBuilder - Robustness & Edge Cases', () => {
   });
 
   describe('4. Data Type Validation', () => {
-    const createAttr = (type: Attribute['type']): Attribute => ({ type });
+    const createAttr = (type: Attribute['type']): Attribute => ({ type, description: `Test ${type} attribute` });
   
     it('should map all supported types correctly', () => {
       const schema: LogicalDataModelIntermediateRepresentationSchema = {
